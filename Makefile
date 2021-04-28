@@ -5,7 +5,7 @@ DEBUG=0
 OBJ=main.o test.o args.o utils.o
 
 VPATH=./src/:./
-EXEC=template
+EXEC=filecheck
 SLIB=lib${EXEC}.so
 ALIB=lib${EXEC}.a
 OBJDIR=./obj/
@@ -14,28 +14,28 @@ CC=gcc
 AR=ar
 ARFLAGS=rcs
 OPTS=-Ofast
-LDFLAGS= -lm -pthread 
-COMMON= -Iinclude/ -Isrc/ 
+LDFLAGS= -lm -pthread
+COMMON= -Iinclude/ -Isrc/
 CFLAGS=-Wall -Wno-unknown-pragmas -Wfatal-errors -fPIC
 
-ifeq ($(OPENMP), 1) 
+ifeq ($(OPENMP), 1)
 CFLAGS+= -fopenmp
 endif
 
-ifeq ($(DEBUG), 1) 
+ifeq ($(DEBUG), 1)
 OPTS=-O0 -g
-COMMON= -Iinclude/ -Isrc/ 
+COMMON= -Iinclude/ -Isrc/
 endif
 
 CFLAGS+=$(OPTS)
 
 OBJS = $(addprefix $(OBJDIR), $(OBJ))
-DEPS = $(wildcard src/*.h) Makefile 
+DEPS = $(wildcard src/*.h) Makefile
 
 all: obj $(SLIB) $(ALIB) $(EXEC)
 
 $(EXEC): $(OBJS)
-	$(CC) $(COMMON) $(CFLAGS) $^ -o $@ $(LDFLAGS) 
+	$(CC) $(COMMON) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 $(ALIB): $(OBJS)
 	$(AR) $(ARFLAGS) $@ $^
@@ -53,4 +53,3 @@ obj:
 
 clean:
 	rm -rf $(OBJS) $(SLIB) $(ALIB) $(EXEC) $(OBJDIR)/*
-

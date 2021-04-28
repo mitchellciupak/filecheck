@@ -1,4 +1,5 @@
 #include <sys/time.h>
+#include <stdio.h>
 
 double get_time()
 {

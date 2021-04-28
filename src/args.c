@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "args.h"
 
 void del_arg(int argc, char **argv, int index)
@@ -68,3 +65,17 @@ char *find_char_arg(int argc, char **argv, char *arg, char *def)
     return def;
 }
 
+void checkFileExistance(char * filename) {
+    if(!isFileExist(filename)){
+        fprintf(stderr, "filecheck: cannot find %s\n", filename);
+        exit(0);
+    }
+}
+
+// https://linux.die.net/man/2/access
+bool isFileExist(char * filename) {
+    if(access(filename, F_OK) == 0){
+        return true;
+    }
+    return false;
+}
