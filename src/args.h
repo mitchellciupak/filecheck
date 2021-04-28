@@ -1,11 +1,9 @@
 #ifndef ARGS_H
 #define ARGS_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include "shared.h"
 
 int find_arg(int argc, char* argv[], char *arg);
 int find_int_arg(int argc, char **argv, char *arg, int def);

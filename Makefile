@@ -2,7 +2,7 @@ OPENCV=0
 OPENMP=0
 DEBUG=0
 
-OBJ=main.o test.o args.o utils.o
+OBJ=main.o test.o args.o utils.o perm.o
 
 VPATH=./src/:./
 EXEC=filecheck
