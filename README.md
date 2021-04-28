@@ -15,3 +15,5 @@
 
 ## Documents
 [Project Specifications](https://engineering.purdue.edu/~ee469/labs_2021/lab5_regular.html)
+[errno() Documentation](https://man7.org/linux/man-pages/man3/errno.3.html)
+[access() Documentation](https://linux.die.net/man/2/access)

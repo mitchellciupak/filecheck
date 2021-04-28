@@ -1,16 +1,13 @@
 #ifndef PERM_H
 #define PERM_H
 
+#include <unistd.h>
+
 #include "../shared.h"
 
 int checkPermFlag(char * flagstring);
-int executePermCheck(char * filename, int flag);
-
-int executePermCheck_R(char * filename);
-int executePermCheck_W(char * filename);
-int executePermCheck_X(char * filename);
-int executePermCheck_RX(char * filename);
-int executePermCheck_RW(char * filename);
-int executePermCheck_WX(char * filename);
+int executePermCheck(char * filename, int mode);
+char * getErrorString(int errsv);
+char * getModeString(int mode);
 
 #endif
