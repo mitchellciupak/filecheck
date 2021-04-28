@@ -88,3 +88,25 @@ char * getErrorString(int errsv){
 
     return "NULL ERROR OCCURED";
 }
+
+//TODO - fix output bug for writting to perm - it is not updating after initial update. This program is called in info.c
+char * findPermFromFile(char * filename){
+    char * perm[3] = {"-","-","-"};
+
+    //Check for read
+    if(access(filename, R_OK) == 0){
+        perm[0] = "r";
+    }
+
+    //Check for write
+    if(access(filename, W_OK) == 0){
+        perm[1] = "w";
+    }
+
+    //Check for x
+    if(access(filename, X_OK) == 0){
+        perm[2] = "x";
+    }
+
+    return *perm;
+}
