@@ -2,7 +2,7 @@ OPENCV=0
 OPENMP=0
 DEBUG=0
 
-OBJ=main.o test.o args.o utils.o perm.o
+OBJ=main.o test.o args.o utils.o modules/perm.o modules/info.o modules/link.o modules/cycle.o
 
 VPATH=./src/:./
 EXEC=filecheck
@@ -16,7 +16,7 @@ ARFLAGS=rcs
 OPTS=-Ofast
 LDFLAGS= -lm -pthread
 COMMON= -Iinclude/ -Isrc/
-CFLAGS=-Wall -Wno-unknown-pragmas -Wfatal-errors -fPIC
+CFLAGS=-Wall -g -Wno-unknown-pragmas -Wfatal-errors -fPIC
 
 ifeq ($(OPENMP), 1)
 CFLAGS+= -fopenmp
@@ -31,6 +31,7 @@ CFLAGS+=$(OPTS)
 
 OBJS = $(addprefix $(OBJDIR), $(OBJ))
 DEPS = $(wildcard src/*.h) Makefile
+MOD_DEPS = $(wildcard src/modules/*.h) Makefile
 
 all: obj $(SLIB) $(ALIB) $(EXEC)
 
@@ -43,7 +44,7 @@ $(ALIB): $(OBJS)
 $(SLIB): $(OBJS)
 	$(CC) $(CFLAGS) -shared $^ -o $@ $(LDFLAGS)
 
-$(OBJDIR)%.o: %.c $(DEPS)
+$(OBJDIR)%.o: %.c $(DEPS) $(MOD_DEPS)
 	$(CC) $(COMMON) $(CFLAGS) -c $< -o $@
 
 obj:

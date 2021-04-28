@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "args.h": "c"
+        "args.h": "c",
+        "perm.h": "c",
+        "info.h": "c"
     }
 }

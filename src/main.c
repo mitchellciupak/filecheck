@@ -2,6 +2,9 @@
 #include "test.h"
 #include "args.h"
 #include "modules/perm.h"
+#include "modules/info.h"
+#include "modules/link.h"
+#include "modules/cycle.h"
 
 int main(int argc, char **argv) {
 
@@ -14,15 +17,15 @@ int main(int argc, char **argv) {
     }
     else if ((0 == strcmp(argv[1], "-i")) | (0 == strcmp(argv[1], "--info"))){
         checkFileExistance(argv[2]);
-        // return executeInfoCheck(argv[2]);
+        return executeInfoCheck(argv[2]);
     }
     else if ((0 == strcmp(argv[1], "-l")) | (0 == strcmp(argv[1], "--linkcheck"))){
         checkFileExistance(argv[2]);
-        // return executeLinkCheck(argv[2]);
+        return executeLinkCheck(argv[2]);
     }
     else if ((0 == strcmp(argv[1], "-d")) | (0 == strcmp(argv[1], "--dispcycles"))){
         checkFileExistance(argv[2]);
-        // return executeCycleCheck(argc[2]);
+        return executeCycleCheck(argv[2]);
     }
     else if ((0 == strcmp(argv[1], "-h")) | (0 == strcmp(argv[1], "--help"))){
         // return executeHelpStatement();
