@@ -3,6 +3,7 @@
 //executeLinkCheck
 // - Given a path, check if the file has any hard links (you don't need to know the path) but just whether
 //   a hard link exists or not.
+// - Ref: https://stackoverflow.com/questions/40564474/how-to-use-lstat-to-determine-if-hard-link-or-not
 int executeLinkCheck(char * filename) {
 
     struct stat buf = {0};

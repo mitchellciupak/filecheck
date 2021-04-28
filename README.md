@@ -15,6 +15,9 @@
     ```
     ./filecheck -i ./README.md
     ```
+    ```
+    ./filecheck -l ./README.md
+    ```
 
 ## Documents
 [Project Specifications](https://engineering.purdue.edu/~ee469/labs_2021/lab5_regular.html)
