@@ -1,9 +1,7 @@
 #include "shared.h"
 #include "test.h"
 #include "args.h"
-#include "perm.h"
-
-// https://engineering.purdue.edu/~ee469/labs_2021/lab5_regular.html
+#include "modules/perm.h"
 
 int main(int argc, char **argv) {
 
@@ -16,18 +14,21 @@ int main(int argc, char **argv) {
     }
     else if ((0 == strcmp(argv[1], "-i")) | (0 == strcmp(argv[1], "--info"))){
         checkFileExistance(argv[2]);
+        // return executeInfoCheck(argv[2]);
     }
     else if ((0 == strcmp(argv[1], "-l")) | (0 == strcmp(argv[1], "--linkcheck"))){
-        checkFileExistance(argv[3]);
+        checkFileExistance(argv[2]);
+        // return executeLinkCheck(argv[2]);
     }
     else if ((0 == strcmp(argv[1], "-d")) | (0 == strcmp(argv[1], "--dispcycles"))){
-        checkFileExistance(argv[3]);
+        checkFileExistance(argv[2]);
+        // return executeCycleCheck(argc[2]);
     }
     else if ((0 == strcmp(argv[1], "-h")) | (0 == strcmp(argv[1], "--help"))){
-        checkFileExistance(argv[3]);
+        // return executeHelpStatement();
     }
     else if (0 == strcmp(argv[1], "test")){
-        checkFileExistance(argv[3]);
+        test();
     }
     else {
         fprintf(stderr, "unrecognized option: %s\n", argv[1]);

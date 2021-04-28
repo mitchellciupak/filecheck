@@ -1,3 +1,5 @@
+#include "perm.h"
+
 // checkPermFlag
 // - return an int value to determine which flag or combination of flags is being called
 int checkPermFlag(char * flagstring) {
@@ -44,8 +46,31 @@ int checkPermFlag(char * flagstring) {
 int executePermCheck(char * filename, int flag) {
 
     if (flag == 1) {
-         return RETURN_SUCCESS;
+         return executePermCheck_R(filename);
+    }
+    else if (flag == 2) {
+         return executePermCheck_W(filename);
+    }
+    else if (flag == 3) {
+         return executePermCheck_W(filename);
+    }
+    else if (flag == 4) {
+         return executePermCheck_W(filename);
+    }
+    else if (flag == 5) {
+         return executePermCheck_W(filename);
+    }
+    else if (flag == 6) {
+         return executePermCheck_W(filename);
     }
 
     return RETURN_FAILURE;
 }
+
+//TODO - write these once you find out what liberaries to use
+int executePermCheck_R(char * filename) {return EXIT_SUCCESS;}
+int executePermCheck_W(char * filename) {return EXIT_SUCCESS;}
+int executePermCheck_X(char * filename) {return EXIT_SUCCESS;}
+int executePermCheck_RX(char * filename) {return EXIT_SUCCESS;}
+int executePermCheck_RW(char * filename) {return EXIT_SUCCESS;}
+int executePermCheck_WX(char * filename) {return EXIT_SUCCESS;}

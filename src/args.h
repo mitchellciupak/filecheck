@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <unistd.h>
+
 #include "shared.h"
 
 int find_arg(int argc, char* argv[], char *arg);
