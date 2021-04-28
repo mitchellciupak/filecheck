@@ -2,7 +2,7 @@ OPENCV=0
 OPENMP=0
 DEBUG=0
 
-OBJ=main.o test.o args.o utils.o modules/perm.o modules/info.o modules/link.o modules/cycle.o
+OBJ=main.o test.o args.o utils.o shared.o modules/perm.o modules/info.o modules/link.o modules/cycle.o
 
 VPATH=./src/:./
 EXEC=filecheck
@@ -54,3 +54,4 @@ obj:
 
 clean:
 	rm -rf $(OBJS) $(SLIB) $(ALIB) $(EXEC) $(OBJDIR)/*
+	mkdir obj/modules

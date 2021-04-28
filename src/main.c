@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
         return executeCycleCheck(argv[2]);
     }
     else if ((0 == strcmp(argv[1], "-h")) | (0 == strcmp(argv[1], "--help"))){
-        // return executeHelpStatement();
+        return executeHelpStatement();
     }
     else if (0 == strcmp(argv[1], "test")){
         test();
