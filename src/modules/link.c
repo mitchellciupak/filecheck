@@ -5,6 +5,14 @@
 //   a hard link exists or not.
 int executeLinkCheck(char * filename) {
 
-    printf("executeLinkCheck");
-    return RETURN_FAILURE;
+    struct stat buf = {0};
+    lstat(filename, &buf);
+
+    if(buf.st_nlink > 0){
+        fprintf(stdout,"filecheck: %s has %lu hard links.\n",filename,buf.st_nlink);
+        return RETURN_SUCCESS;
+    }
+
+    fprintf(stdout,"filecheck: %s has no hard links.\n",filename);
+    return RETURN_SUCCESS;
 }
