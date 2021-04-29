@@ -6,35 +6,44 @@
 #include "modules/link.h"
 #include "modules/cycle.h"
 
-int main(int argc, char **argv) {
 
-    if (argc < 2 || argc > 4) {
-        fprintf(stderr, "filecheck: inorrect number of arguments. Run %s -h or --help for usage\n", argv[0]);
+int main(int argc, char **argv) {
+    int ct = 0;
+    int file = argc - 1;
+    //int exists;
+
+    if (argc < 2) {
+        fprintf(stderr, "filecheck: incorrect number of arguments. Run %s -h or --help for usage\n", argv[0]);
+        return RETURN_FAILURE;
     }
-    else if ((0 == strcmp(argv[1], "-p")) | (0 == strcmp(argv[1], "--permcheck"))){
-        checkFileExistance(argv[3]);
-        return executePermCheck(argv[3], checkPermFlag(argv[2]));
-    }
-    else if ((0 == strcmp(argv[1], "-i")) | (0 == strcmp(argv[1], "--info"))){
-        checkFileExistance(argv[2]);
-        return executeInfoCheck(argv[2]);
-    }
-    else if ((0 == strcmp(argv[1], "-l")) | (0 == strcmp(argv[1], "--linkcheck"))){
-        checkFileExistance(argv[2]);
-        return executeLinkCheck(argv[2]);
-    }
-    else if ((0 == strcmp(argv[1], "-d")) | (0 == strcmp(argv[1], "--dispcycles"))){
-        checkFileExistance(argv[2]);
-        return executeCycleCheck(argv[2]);
-    }
-    else if ((0 == strcmp(argv[1], "-h")) | (0 == strcmp(argv[1], "--help"))){
-        return executeHelpStatement();
-    }
-    else if (0 == strcmp(argv[1], "test")){
-        test();
-    }
-    else {
-        fprintf(stderr, "unrecognized option: %s\n", argv[1]);
+
+    ct++; // The file name
+    while(ct < argc - 1){
+        checkFileExistance(argv[file]);
+
+        if ((0 == strcmp(argv[ct], "-p")) | (0 == strcmp(argv[ct], "--permcheck"))){
+            executePermCheck(argv[file], checkPermFlag(argv[ct + 1]));
+            ct++;
+        }
+        else if ((0 == strcmp(argv[ct], "-i")) | (0 == strcmp(argv[ct], "--info"))){
+            executeInfoCheck(argv[file]);
+        }
+        else if ((0 == strcmp(argv[ct], "-l")) | (0 == strcmp(argv[ct], "--linkcheck"))){
+            executeLinkCheck(argv[file]);
+        }
+        else if ((0 == strcmp(argv[ct], "-d")) | (0 == strcmp(argv[ct], "--dispcycles"))){
+            executeCycleCheck(argv[file]);
+        }
+        else if ((0 == strcmp(argv[ct], "-h")) | (0 == strcmp(argv[ct], "--help"))){
+            executeHelpStatement();
+        }
+        else if (0 == strcmp(argv[1], "test")){
+            test();
+        }
+        else {
+            fprintf(stderr, "unrecognized option: %s\n", argv[ct]);
+        }
+        ct++;
     }
     return RETURN_FAILURE;
 }

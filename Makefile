@@ -49,6 +49,7 @@ $(OBJDIR)%.o: %.c $(DEPS) $(MOD_DEPS)
 
 obj:
 	mkdir -p obj
+	mkdir -p obj/modules
 
 .PHONY: clean
 

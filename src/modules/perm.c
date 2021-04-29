@@ -59,15 +59,16 @@ int executePermCheck(char * filename, int mode) {
 // - returns mode sting for stdout and stderr printing
 char * getModeString(int mode){
 
-    if(mode == 4){ return "r";}
-    if(mode == 2){ return "w";}
-    if(mode == 1){ return "x";}
-    if(mode == 6){ return "rw";}
-    if(mode == 5){ return "rx";}
-    if(mode == 3){ return "wx";}
-    if(mode == 7){ return "rwx";}
-
-    return "NULL ERROR OCCURED";
+    switch(mode){
+        case 4  : return "r";
+        case 2  : return "w";
+        case 1  : return "x";
+        case 6  : return "rw";
+        case 5  : return "rx";
+        case 3  : return "wx";
+        case 7  : return "rwx";
+        default : return "Null error occured";
+    }
 }
 
 //getErrorString
@@ -89,24 +90,27 @@ char * getErrorString(int errsv){
     return "NULL ERROR OCCURED";
 }
 
+
 //TODO - fix output bug for writting to perm - it is not updating after initial update. This program is called in info.c
-char * findPermFromFile(char * filename){
-    char * perm[3] = {"-","-","-"};
+void findPermFromFile(struct stat* inode, char* perm_arr ){
+    // Mode is in octal form, wow
+    int mode = inode->st_mode & MODE_MASK;
+    char perm[PERM_SIZE];
+    int inv;
+    char* ptr = perm;
 
-    //Check for read
-    if(access(filename, R_OK) == 0){
-        perm[0] = "r";
+    for(int i=0;i<PERM_SIZE;i++){
+        inv = PERM_SIZE - i - 1;
+        if(mode & (1<<i)){
+            switch(i%3){
+                case 0: ptr[inv] = 'x'; break;
+                case 1: ptr[inv] = 'w'; break;
+                case 2: ptr[inv] = 'r'; break;
+            }
+        }
+        else ptr[inv] = '-';
+
     }
-
-    //Check for write
-    if(access(filename, W_OK) == 0){
-        perm[1] = "w";
-    }
-
-    //Check for x
-    if(access(filename, X_OK) == 0){
-        perm[2] = "x";
-    }
-
-    return *perm;
+    memcpy(perm_arr, ptr, PERM_SIZE);
+    perm_arr[PERM_SIZE] = '\0';
 }
