@@ -1,6 +1,9 @@
 #ifndef INFO_H
 #define INFO_H
 
+#define PATH_MAX 4096
+#define MODE_MAX 20
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
