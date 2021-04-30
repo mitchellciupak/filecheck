@@ -1,40 +1,67 @@
 #include "info.h"
+#define PATH_MAX 1000
+#define MODE_MAX 20
+
 
 //executeInfoCheck
 // - Given a path, display the metadata of the file. Specifically,
 int executeInfoCheck(char * filename) {
+    char perm[PERM_SIZE+1];
+    char mode[MODE_MAX];
+    char* path = malloc(sizeof(*path) * PATH_MAX);
+    struct stat* inode = malloc(sizeof(*inode));
 
-    struct stat buf = {0};
-    lstat(filename, &buf);
+    lstat(filename, inode);
+    findPathToParentDirFromFile(filename, &path);
+    
+    findPermFromFile(inode, perm);
+    findFileTypeFromFile(inode, mode);
 
-    fprintf(stdout,"\nfilecheck: information for %s:\n",filename);
+    fprintf(stdout,"\nfilecheck: information for %s:\n", filename);
     fprintf(stdout, "======================================\n");
-    fprintf(stdout,"DeviceID:           %lu\n",buf.st_dev);
-    fprintf(stdout,"UserID:             %u\n",buf.st_uid);
-    fprintf(stdout,"GroupID:            %u\n",buf.st_gid);
+    fprintf(stdout,"DeviceID:           %lu\n", inode->st_dev);
+    fprintf(stdout,"UserID:             %u\n", inode->st_uid);
+    fprintf(stdout,"GroupID:            %u\n", inode->st_gid);
     fprintf(stdout, "======================================\n");
-    fprintf(stdout,"inode:              %lu\n",buf.st_ino);
-    fprintf(stdout,"Permissions:        %s\n",findPermFromFile(filename));
-    fprintf(stdout,"FileType:           %s\n",findFileTypeFromFile(filename));
-    fprintf(stdout,"ParentDir:          %s\n",findPathToParentDirFromFile(filename));
-    fprintf(stdout,"Number Hard Links:  %lu\n",buf.st_nlink);
+    fprintf(stdout,"inode:              %lu\n", inode->st_ino);
+    fprintf(stdout,"Permissions:        %s\n", perm);
+    fprintf(stdout,"FileType:           %s\n", mode);
+    fprintf(stdout,"ParentDir:          %s\n", path);
+    fprintf(stdout,"Number Hard Links:  %lu\n", inode->st_nlink);
     fprintf(stdout, "======================================\n");
-    fprintf(stdout,"Size (Bytes):       %lu\n",buf.st_size);
-    fprintf(stdout,"Blocksize:          %lu\n",buf.st_blksize);
-    fprintf(stdout,"Blocks Allocated (512MB per block): %lu\n",buf.st_blocks);
+    fprintf(stdout,"Size (Bytes):       %lu\n", inode->st_size);
+    fprintf(stdout,"Blocksize:          %lu\n", inode->st_blksize);
+    fprintf(stdout,"Blocks Allocated (512MB per block): %lu\n", inode->st_blocks);
     fprintf(stdout, "======================================\n");
-    fprintf(stdout,"DateTimeLastAcessed:       %lld.%.9ld\n",(long long) buf.st_atim.tv_sec,buf.st_atim.tv_nsec);
-    fprintf(stdout,"DateTimeLastModified:      %lld.%.9ld\n",(long long) buf.st_mtim.tv_sec,buf.st_mtim.tv_nsec);
-    fprintf(stdout,"DateTimeLastStatusChange:  %lld.%.9ld\n",(long long) buf.st_ctim.tv_sec,buf.st_ctim.tv_nsec);
+    fprintf(stdout,"DateTimeLastAcessed:       %lld.%.9ld\n",(long long)  inode->st_atim.tv_sec, inode->st_atim.tv_nsec);
+    fprintf(stdout,"DateTimeLastModified:      %lld.%.9ld\n",(long long)  inode->st_mtim.tv_sec, inode->st_mtim.tv_nsec);
+    fprintf(stdout,"DateTimeLastStatusChange:  %lld.%.9ld\n",(long long)  inode->st_ctim.tv_sec, inode->st_ctim.tv_nsec);
     return RETURN_SUCCESS;
 }
 
-char * findFileTypeFromFile(char * filename){
-    //TODO - does this mean read for file extention or is there something we can call
-    return "NOTDONE";
+void findFileTypeFromFile(struct stat* inode, char* mode_arr){
+    int mode = inode->st_mode & S_IFMT;
+    if(S_ISREG(mode)) memcpy(mode_arr, "regular", MODE_MAX);
+    else if(S_ISDIR(mode)) memcpy(mode_arr, "directory", MODE_MAX);
+    else if(S_ISCHR(mode)) memcpy(mode_arr, "character device", MODE_MAX);
+    else if(S_ISBLK(mode)) memcpy(mode_arr, "block device", MODE_MAX);
+    else if(S_ISFIFO(mode)) memcpy(mode_arr, "FIFO", MODE_MAX);
+    else if(S_ISLNK(mode)) memcpy(mode_arr, "symbolic link", MODE_MAX);
+    else if(S_ISSOCK(mode)) memcpy(mode_arr, "socket", MODE_MAX);
+    else memcpy(mode_arr, "no idea", MODE_MAX);
 }
 
-char * findPathToParentDirFromFile(char * filename){
-    //TODO - print the full path, basically pwd but cant call that
-    return "NOTDONE";
+void findPathToParentDirFromFile(char * filename, char** path){
+    char* full_path = malloc(PATH_MAX * sizeof(*full_path)); 
+    char parent_path[PATH_MAX];
+    int str_len;
+    
+    full_path = realpath(filename, NULL);
+    str_len = strlen(full_path) - strlen(filename);
+    assert(str_len < PATH_MAX);
+    memcpy(parent_path, full_path, str_len);
+    parent_path[str_len] = '\0';
+    *path = parent_path;
+    free(full_path);
 }
+
