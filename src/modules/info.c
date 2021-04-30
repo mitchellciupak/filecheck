@@ -1,5 +1,4 @@
 #include "info.h"
-#include <dirent.h>
 
 //executeInfoCheck
 // - Given a path, display the metadata of the file. Specifically,
@@ -11,7 +10,7 @@ int executeInfoCheck(char * filename) {
 
     lstat(filename, inode);
     findPathToParentDirFromFile(filename, &path);
-    
+
     findPermFromFile(inode, perm);
     findFileTypeFromFile(inode, mode);
 
@@ -50,9 +49,9 @@ void findFileTypeFromFile(struct stat* inode, char* mode_arr){
 }
 
 void findPathToParentDirFromFile(char * filename, char** path){
-    char* full_path = malloc(PATH_MAX * sizeof(*full_path)); 
+    char* full_path = malloc(PATH_MAX * sizeof(*full_path));
     int str_len;
-    
+
     full_path = realpath(filename, NULL);
     char * file = strrchr(full_path, '/') + 1;
     str_len = strlen(full_path) - strlen(file);
@@ -63,4 +62,3 @@ void findPathToParentDirFromFile(char * filename, char** path){
 
     free(full_path);
 }
-

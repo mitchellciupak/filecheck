@@ -3,7 +3,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "sys/stat.h"
+#include <dirent.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 #define RETURN_FAILURE 0
 #define RETURN_SUCCESS 1

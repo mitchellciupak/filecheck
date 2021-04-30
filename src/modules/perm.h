@@ -1,7 +1,6 @@
 #ifndef PERM_H
 #define PERM_H
 
-#include <unistd.h>
 #include <errno.h>
 
 #include "../shared.h"
