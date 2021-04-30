@@ -37,8 +37,9 @@ folder * allocateSubFolders(folder * parent){
     for(i = 0; i < parent->numChildren; i++){
         tempArr[i].id = parent->id + i;
         tempArr[i].numChildren = getNumChildren(tempArr[i].id);
+        tempArr[i].childrenArr = allocateSubFolders(&tempArr[i]);
 
-        if(isFolderSymLink(tempArr[i].id)){
+        if(isFolderSymLink(tempArr[i].id) == 1){
             tempArr[i].isSymLink = 1;
             tempArr[i].SymLinkID = getSymLinkID(tempArr[i].id);
         } else {
@@ -50,20 +51,33 @@ folder * allocateSubFolders(folder * parent){
     return tempArr;
 }
 
-void folderfree(folder * top){
+//TODO - directory scanning, built curreltly for hypothetical test
+int getNumChildren(int id){
+    if(id == 0){return 3;} //top parent
+    if((id == 1) | (id == 2) | (id == 3)) {return 2;} //top parent's imeediate children
+    return 0; //else for top prarent's grand children
+}
+
+//TODO - symlink scanning, built curreltly for hypothetical test
+int isFolderSymLink(int id){
+    if((id == 6) | (id == 8) | (id == 9)) {return 1;}
+    return 0;
+}
+
+void folderfree(folder * parent){
     int i;
 
-    if(top->numChildren == 0){
+    if(parent->numChildren == 0){
         return;
     }
 
-    for(i = 0; i<top->numChildren;i++){
-        folderfree(top->childrenArr[i]);
-        free(top->childrenArr[i]);
+    for(i = 0; i<parent->numChildren;i++){
+        folderfree(parent->childrenArr[i]);
+        free(parent->childrenArr[i]);
     }
 
-    //Free top most
-    if(top->id == 0){
+    //Free top most parent only
+    if(parent->id == 0){
         free(top);
     }
 
