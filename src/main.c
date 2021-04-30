@@ -10,7 +10,6 @@
 int main(int argc, char **argv) {
     int ct = 0;
     int file = argc - 1;
-    //int exists;
 
     if (argc < 2) {
         fprintf(stderr, "filecheck: incorrect number of arguments. Run %s -h or --help for usage\n", argv[0]);
