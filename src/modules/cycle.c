@@ -6,37 +6,74 @@
 int executeCycleCheck(char * filename) {
 
     struct folder * parent = malloc(1 * sizeof(struct folder));
+    parent->relativePath = filename;
     parent->canonicalPath = canonicalize_file_name(filename);
-    parent->id = 0;
+    parent->isRelativeRoot = 1;
+    parent->numChildren = 0;
+
+    //Open Dir
+    struct dirent *dir_read;
+    DIR * dir = opendir(filename);
+    if (dir == NULL) {
+        printf ("Cannot open directory '%s'\n", filename);
+        return 1;
+    }
+
+    //Count Dir's Subfolders
+    while ((dir_read = readdir(dir)) != NULL) {
+        if(dir_read->d_name[0] == '.') {continue;} //Ignore . and ..
+
+        if(dir_read->d_type == DT_DIR){
+
+        }
+
+        if(dir_read->d_type == DT_LNK) {
+            printf ("[%s]\n", dir_read->d_name);
+            parent->numChildren += 1;
+        }
+
+    }
+
+    closedir(dir);
+
     fprintf(stderr, "CYCLE: Parent Con Path = %s\n",parent->canonicalPath);
+    fprintf(stderr, "CYCLE: Parent Rel Path = %s\n",parent->relativePath);
+    fprintf(stderr, "CYCLE: Parent Num Sub-Paths = %d\n",parent->numChildren);
 
 
-    ////////// FROM HERE THIS IS A HYPOTHETICAL TEST ///////////
-    fprintf(stderr, "TEST: START\n");
-    parent->numChildren = 3;
 
-    fprintf(stderr, "TEST: START ALLOC SUB\n");
-    parent->childrenArr = allocateSubFolders(parent);
-    fprintf(stderr, "TEST: END ALLOC SUB\n");
 
-    //populate folder strucutes all the way down
-    fprintf(stderr, "TEST: START CHECK\n");
-    checkForCycles(parent);
-    fprintf(stderr, "TEST: END CHECK\n");
 
-    //check for cycles
-    // fprintf(stderr, "TEST: START PRINT\n");
-    // printFolderStructure(parent);
-    // fprintf(stderr, "TEST: END PRINT\n");
+    // ////////// FROM HERE THIS IS A HYPOTHETICAL TEST ///////////
+    // fprintf(stderr, "TEST: START\n");
+    // parent->numChildren = 3;
 
-    fprintf(stderr, "TEST: END\n");
-    ////////// END OF HYPOTHETICAL TEST ///////////
+    // fprintf(stderr, "TEST: START ALLOC SUB\n");
+    // parent->childrenArr = allocateSubFolders(parent);
+    // fprintf(stderr, "TEST: END ALLOC SUB\n");
 
-    folderfree(parent);
-    fprintf(stderr, "CYCLE: END\n");
+    // //populate folder strucutes all the way down
+    // fprintf(stderr, "TEST: START CHECK\n");
+    // checkForCycles(parent);
+    // fprintf(stderr, "TEST: END CHECK\n");
+
+    // //check for cycles
+    // // fprintf(stderr, "TEST: START PRINT\n");
+    // // printFolderStructure(parent);
+    // // fprintf(stderr, "TEST: END PRINT\n");
+
+    // fprintf(stderr, "TEST: END\n");
+    // ////////// END OF HYPOTHETICAL TEST ///////////
+
+    // folderfree(parent);
+    // fprintf(stderr, "CYCLE: END\n");
+
+    free(parent->canonicalPath);
+    free(parent);
+
     return RETURN_FAILURE;
 }
-
+/*
 struct folder * allocateSubFolders(struct folder * parent){
     int i = 0; //counter for the loop
     int idx = 0; //index for the array
@@ -227,3 +264,4 @@ int findLinkExample(char * path) {
     free(abs_path);
     return RETURN_FAILURE;
 }
+*/

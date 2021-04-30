@@ -7,9 +7,9 @@
 #include "../shared.h"
 
 struct folder {
-    int id;
+
+    int isRelativeRoot;  //0 or 1
     int isSymLink;  //0 or 1
-    int SymLinkID;
     int numChildren;//0 to INT_MAX
 
     struct folder * childrenArr;
