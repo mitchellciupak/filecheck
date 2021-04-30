@@ -20,6 +20,9 @@ int executeCycleCheck(char * filename) {
     parent->numChildren = 3;
     parent->childrenArr = allocateSubFolders(parent);
 
+    checkForCycles(parent);
+    printFolderStructure(parent);
+
     ////////// END OF HYPOTHETICAL TEST ///////////
 
     //populate folder strucutes all the way down
@@ -64,6 +67,51 @@ int isFolderSymLink(int id){
     return 0;
 }
 
+//TODO - symlink scanning, built curreltly for hypothetical test
+int getSymLinkID(int id){
+    if(id == 6){return 0;} //child2's left child is a link back to root
+    if(id == 9){return 0;} //child3's right child is a link back to root
+    if(id == 8){return 3;} //child3's left child is a link back to child3
+}
+
+//TODO - Not currently checking for cycles (when isSymLink is 1 and SymLinkID matches an ID amongst the sub folders)
+void checkForCycles(folder * parent){
+    int i;
+
+    if(parent->numChildren == 0){
+        return;
+    }
+
+    for(i = 0; i<parent->numChildren;i++){
+        checkForCycles(parent->childrenArr[i]);
+        // fprinf(stdout,"id: %d",parent->childrenArr[i].id);
+    }
+}
+
+void printFolderStructure(folder * parent){
+    int i;
+
+    // Printing Leaf Nodes
+    if(parent->numChildren == 0){
+        fprintf(stdout, "%d",parent->id);
+
+        if(parent->isSymLink == 1){
+            fprintf(stdout, "->%d",parent->SymLinkID);
+        }
+
+        return;
+    }
+
+    for(i = 0; i<parent->numChildren;i++){
+        printFolderStructure(parent->childrenArr[i]);
+        fprintf(stdout, "     ");
+    }
+
+    //Printing Parent Nodes
+    fprintf(stdout, "\n %d \n",parent->id);
+
+}
+
 void folderfree(folder * parent){
     int i;
 
@@ -78,7 +126,7 @@ void folderfree(folder * parent){
 
     //Free top most parent only
     if(parent->id == 0){
-        free(top);
+        free(parent);
     }
 
 }
