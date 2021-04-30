@@ -1,7 +1,5 @@
 #include "info.h"
-#define PATH_MAX 1000
-#define MODE_MAX 20
-
+#include <dirent.h>
 
 //executeInfoCheck
 // - Given a path, display the metadata of the file. Specifically,
@@ -53,15 +51,16 @@ void findFileTypeFromFile(struct stat* inode, char* mode_arr){
 
 void findPathToParentDirFromFile(char * filename, char** path){
     char* full_path = malloc(PATH_MAX * sizeof(*full_path)); 
-    char parent_path[PATH_MAX];
     int str_len;
     
     full_path = realpath(filename, NULL);
-    str_len = strlen(full_path) - strlen(filename);
+    char * file = strrchr(full_path, '/') + 1;
+    str_len = strlen(full_path) - strlen(file);
+
     assert(str_len < PATH_MAX);
-    memcpy(parent_path, full_path, str_len);
-    parent_path[str_len] = '\0';
-    *path = parent_path;
+    if(str_len-1 == 0) strncpy(*path, "(root dir)", 12);
+    else strncpy(*path, full_path, str_len-1);
+
     free(full_path);
 }
 
