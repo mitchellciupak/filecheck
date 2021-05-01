@@ -138,7 +138,7 @@ void freefolderstruct(struct folder * parent) {
     free(parent->relativePath);
 
     for(i = 0; i<parent->numChildren; i++){
-        freefolderstruct(parent->childrenArr[i]);
+        freefolderstruct(&parent->childrenArr[i]);
     }
 
     free(parent->childrenArr);
