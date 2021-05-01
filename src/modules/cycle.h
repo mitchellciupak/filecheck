@@ -28,7 +28,8 @@ void checkForCycles(struct folder * parent);
 void printFolderStructure(struct folder * parent);
 void folderfree(struct folder * top);
 void getFolderMetadata(struct folder * curr);
-char * getRelativePath(char * parent_dir, char * foldername);
+void getRelativePath(char * parent_dir, char * foldername, char** path);
+void descend(struct folder * top);
 
 //ckemmet
 int findLinkExample(char * path);

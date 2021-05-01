@@ -36,7 +36,7 @@ MOD_DEPS = $(wildcard src/modules/*.h) Makefile
 all: obj $(SLIB) $(ALIB) $(EXEC)
 
 $(EXEC): $(OBJS)
-	$(CC) $(COMMON) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+	$(CC) $(COMMON) $(CFLAGS) $^ -g -o $@ $(LDFLAGS)
 
 $(ALIB): $(OBJS)
 	$(AR) $(ARFLAGS) $@ $^

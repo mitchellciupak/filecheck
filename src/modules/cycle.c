@@ -1,12 +1,12 @@
 #include "cycle.h"
-
+void ascend(char * path);
 //executeCycleCheck
 // - Given a path, display all cyclic links under the path. Specifically,
 //   traverse the given path recursively and display all links to a parent path.
 int executeCycleCheck(char * path) {
 
     //Init root
-    struct folder * root = malloc(1 * sizeof(struct folder));
+    struct folder * root = malloc(sizeof(*root));
     root->isRelativeRoot = 1;
     root->relativePath = path;
     root->canonicalPath = canonicalize_file_name(path);
@@ -20,9 +20,10 @@ int executeCycleCheck(char * path) {
     }
 
     // fprintf(stderr,"%s",getRelativePath(root->relativePath,"child1"));
-
+    //ascend(path);
     root->childrenArr = allocateSubFolders(root);
-
+    
+    descend(root);
 
     fprintf(stderr, "CYCLE: root Con Path = %s\n",root->canonicalPath);
     fprintf(stderr, "CYCLE: root Rel Path = %s\n",root->relativePath);
@@ -62,12 +63,39 @@ int executeCycleCheck(char * path) {
     return RETURN_SUCCESS;
 }
 
+void ascend(char * path){
+    char * parent = malloc(strlen(path) + 4);
+    strcpy(parent, "../");
+    strcat(parent, path);
+    
+    DIR * dir = opendir(parent);
+    struct dirent* dir_read = readdir(dir);
+
+    printf("Upper level of %s: %s\n", parent, dir_read->d_name);
+    ascend(parent);
+    closedir(dir);
+}
+
+void descend(struct folder * top){
+    
+    for(int ct = 0; ct < top->numChildren; ct++){
+        descend(&top->childrenArr[ct]);
+    }
+    if(top->isSymLink){
+        char * a = strstr(top->canonicalPath, top->relativePath);
+        if(a != NULL){
+            // TODO find out how to find the symlinked file!
+            printf("Link found from %s to %s\n", top->relativePath, top->canonicalPath);
+        }
+    }
+}
+
 struct folder * allocateSubFolders(struct folder * parent_dir) {
     int i = 0;
     struct dirent *dir_read;
 
     //Allocate Array of Subfolders //TODO - free
-    struct folder * subfolders = malloc(parent_dir->numChildren * sizeof(struct folder));
+    struct folder * subfolders = malloc(parent_dir->numChildren * sizeof(*subfolders));
 
     //Open Parent Directory
     DIR * dir = opendir(parent_dir->canonicalPath);
@@ -82,10 +110,11 @@ struct folder * allocateSubFolders(struct folder * parent_dir) {
             subfolders[i].ino = dir_read->d_ino;
             subfolders[i].isRelativeRoot = 0;
             subfolders[i].isSymLink = 0;
-            subfolders[i].relativePath = getRelativePath(parent_dir->relativePath,dir_read->d_name); //TODO - free
-            fprintf(stderr, "6%s\n",subfolders[i].relativePath);
-            subfolders[i].canonicalPath = canonicalize_file_name(subfolders[i].relativePath); //TODO - free
-            fprintf(stderr, "6%s\n",subfolders[i].canonicalPath);
+            getRelativePath(parent_dir->relativePath, dir_read->d_name, &subfolders[i].relativePath);
+            printf("Rel path = %s\n", subfolders[i].relativePath);
+            subfolders[i].canonicalPath = malloc(PATH_MAX);
+            realpath(subfolders[i].relativePath, subfolders[i].canonicalPath);
+            //subfolders[i].canonicalPath = realpath(subfolders[i].relativePath, NULL); //TODO - free
             subfolders[i].numChildren = getNumChildren(subfolders[i].canonicalPath);
             fprintf(stderr,"folder: %s, ino: %d, conPath: %s\n",dir_read->d_name,subfolders[i].ino,subfolders[i].canonicalPath);
 
@@ -100,10 +129,12 @@ struct folder * allocateSubFolders(struct folder * parent_dir) {
             subfolders[i].ino = dir_read->d_ino;
             subfolders[i].isRelativeRoot = 0;
             subfolders[i].isSymLink = 1;
-            subfolders[i].relativePath = getRelativePath(parent_dir->relativePath,dir_read->d_name); //TODO - free
-            fprintf(stderr, "6%s\n",subfolders[i].relativePath);
-            subfolders[i].canonicalPath = canonicalize_file_name(subfolders[i].relativePath); //TODO - free
-            fprintf(stderr, "6%s\n",subfolders[i].canonicalPath);
+            getRelativePath(parent_dir->relativePath, dir_read->d_name, &subfolders[i].relativePath);
+            printf("Rel path = %s\n", subfolders[i].relativePath);
+            subfolders[i].canonicalPath = malloc(PATH_MAX);
+            realpath(subfolders[i].relativePath, subfolders[i].canonicalPath);
+            //subfolders[i].canonicalPath = canonicalize_file_name(subfolders[i].relativePath); //TODO - free
+
             fprintf(stderr,"folder: %s, ino: %d, conPath: %s\n",dir_read->d_name,subfolders[i].ino,subfolders[i].canonicalPath);
 
             //allocate and read into
@@ -120,22 +151,19 @@ struct folder * allocateSubFolders(struct folder * parent_dir) {
     return subfolders;
 }
 
-char * getRelativePath(char * parent_dir, char * foldername){
+// parentdir + (/) + foldername
+void getRelativePath(char * parent_dir, char * foldername, char** path){
     int plen = strlen(parent_dir);
     int flen = strlen(foldername);
+    int extra = (parent_dir[plen-1] != '/') ? 1 : 0;
+    char zero[1] = "";
 
-    if (parent_dir[plen-1] != '/'){
-        char * relpath = calloc(0,(plen+flen+1) * sizeof(char));
-        strcat(relpath,parent_dir);
-        strcat(relpath,"/");
-        strcat(relpath,foldername);
-        return relpath;
-    } else {
-        char * relpath = calloc(0,(plen+flen) * sizeof(char));
-        strcat(relpath,parent_dir);
-        strcat(relpath,foldername);
-        return relpath;
-    }
+    char * relpath = calloc(0, (plen+flen+extra+2) * sizeof(char));
+    strncpy(relpath, parent_dir, plen);
+    strcat(relpath, (parent_dir[plen-1] != '/') ? "/" : "");
+    strncat(relpath, foldername, flen);
+
+    *path = relpath;
 }
 
 /*
@@ -183,7 +211,6 @@ int getNumChildren(char * path){
         }
         else if(dir_read->d_type == DT_LNK) {
             count += 1;
-
         }
     }
 
@@ -205,6 +232,7 @@ int isLink(char* path){
     int mode = inode->st_mode & S_IFMT;
     return S_ISLNK(mode);
 }
+
 
 //TODO - symlink scanning, built curreltly for hypothetical test
 int getSymLinkID(int id){
