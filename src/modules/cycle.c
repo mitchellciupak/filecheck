@@ -66,13 +66,12 @@ struct folder * allocateSubFolders(struct folder * parent_dir) {
     int i = 0;
     struct dirent *dir_read;
 
-    fprintf(stderr, "1\n");
     //Allocate Array of Subfolders //TODO - free
     struct folder * subfolders = malloc(parent_dir->numChildren * sizeof(struct folder));
-    fprintf(stderr, "2\n");
+
     //Open Parent Directory
     DIR * dir = opendir(parent_dir->canonicalPath);
-    fprintf(stderr, "3\n");
+
     //Populate Child Directories
     while (((dir_read = readdir(dir)) != NULL) && (i<parent_dir->numChildren)) {
         fprintf(stderr, "any: %s\n",dir_read->d_name);
@@ -97,11 +96,14 @@ struct folder * allocateSubFolders(struct folder * parent_dir) {
             i++;
         }
         else if(dir_read->d_type == DT_LNK) {
+            fprintf(stderr, "lnk: %s\n",dir_read->d_name);
             subfolders[i].ino = dir_read->d_ino;
             subfolders[i].isRelativeRoot = 0;
             subfolders[i].isSymLink = 1;
             subfolders[i].relativePath = getRelativePath(parent_dir->relativePath,dir_read->d_name); //TODO - free
+            fprintf(stderr, "6%s\n",subfolders[i].relativePath);
             subfolders[i].canonicalPath = canonicalize_file_name(subfolders[i].relativePath); //TODO - free
+            fprintf(stderr, "6%s\n",subfolders[i].canonicalPath);
             fprintf(stderr,"folder: %s, ino: %d, conPath: %s\n",dir_read->d_name,subfolders[i].ino,subfolders[i].canonicalPath);
 
             //allocate and read into
@@ -137,34 +139,6 @@ char * getRelativePath(char * parent_dir, char * foldername){
 }
 
 /*
-struct folder * allocateSubFolders(struct folder * parent){
-    int i = 0; //counter for the loop
-    int idx = 0; //index for the array
-
-    fprintf(stderr, "ALLOCSUB: START FROM PARENT ID = %d\n",parent->id);
-
-    struct folder * tempArr = malloc(parent->numChildren * sizeof(struct folder));
-
-    for(i = 0; i < parent->numChildren; i++){
-
-        //Update Current Folder Metadata
-        tempArr[i].id = parent->id + i + 1;
-        getFolderMetadata(&tempArr[i]);
-
-        // fprintf(stderr, "ALLOCSUB: index = %d, numchild = %d\n",tempArr[idx].id,tempArr[idx].numChildren);
-
-        if(tempArr[idx].numChildren >= 1){
-            tempArr[idx].childrenArr = allocateSubFolders(&tempArr[idx]);
-        }
-
-        // fprintf(stderr, "ALLOCSUB: FOLDER NODE: id = %d, numChildren = %d, isSymLink = %d, symlinkID = %d\n",tempArr[idx].id,tempArr[idx].numChildren,tempArr[idx].isSymLink,tempArr[idx].SymLinkID);
-    }
-
-    fprintf(stderr, "ALLOCSUB: END\n");
-
-    return tempArr;
-}
-
 void getFolderMetadata(struct folder * curr){
 
     curr->numChildren = getNumChildren(curr->id);
@@ -182,6 +156,7 @@ void getFolderMetadata(struct folder * curr){
 
 }
 */
+
 int getNumChildren(char * path){
     int count = 0;
     struct dirent *dir_read;
