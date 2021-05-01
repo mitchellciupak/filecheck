@@ -3,42 +3,30 @@
 //executeCycleCheck
 // - Given a path, display all cyclic links under the path. Specifically,
 //   traverse the given path recursively and display all links to a parent path.
-int executeCycleCheck(char * filename) {
+int executeCycleCheck(char * path) {
 
-    struct folder * parent = malloc(1 * sizeof(struct folder));
-    parent->relativePath = filename;
-    parent->canonicalPath = canonicalize_file_name(filename);
-    parent->isRelativeRoot = 1;
-    parent->numChildren = 0;
+    //Init root
+    struct folder * root = malloc(1 * sizeof(struct folder));
+    root->isRelativeRoot = 1;
+    root->relativePath = path;
+    root->canonicalPath = canonicalize_file_name(path);
 
-    //Open Dir
-    struct dirent *dir_read;
-    DIR * dir = opendir(filename);
-    if (dir == NULL) {
-        printf ("Cannot open directory '%s'\n", filename);
-        return 1;
+    root->numChildren = getNumChildren(root->canonicalPath);
+    if(root->numChildren < 1) {
+        fprintf(stderr,"executeCycleCheck: '%s' is not a directory or has no subfoders or links.\n", path);
+        free(root->canonicalPath);
+        free(root);
+        return RETURN_FAILURE;
     }
 
-    //Count Dir's Subfolders
-    while ((dir_read = readdir(dir)) != NULL) {
-        if(dir_read->d_name[0] == '.') {continue;} //Ignore . and ..
+    // fprintf(stderr,"%s",getRelativePath(root->relativePath,"child1"));
 
-        if(dir_read->d_type == DT_DIR){
+    root->childrenArr = allocateSubFolders(root);
 
-        }
 
-        if(dir_read->d_type == DT_LNK) {
-            printf ("[%s]\n", dir_read->d_name);
-            parent->numChildren += 1;
-        }
-
-    }
-
-    closedir(dir);
-
-    fprintf(stderr, "CYCLE: Parent Con Path = %s\n",parent->canonicalPath);
-    fprintf(stderr, "CYCLE: Parent Rel Path = %s\n",parent->relativePath);
-    fprintf(stderr, "CYCLE: Parent Num Sub-Paths = %d\n",parent->numChildren);
+    fprintf(stderr, "CYCLE: root Con Path = %s\n",root->canonicalPath);
+    fprintf(stderr, "CYCLE: root Rel Path = %s\n",root->relativePath);
+    fprintf(stderr, "CYCLE: root Num Sub-Paths = %d\n",root->numChildren);
 
 
 
@@ -46,33 +34,108 @@ int executeCycleCheck(char * filename) {
 
     // ////////// FROM HERE THIS IS A HYPOTHETICAL TEST ///////////
     // fprintf(stderr, "TEST: START\n");
-    // parent->numChildren = 3;
+    // root->numChildren = 3;
 
     // fprintf(stderr, "TEST: START ALLOC SUB\n");
-    // parent->childrenArr = allocateSubFolders(parent);
+    // root->childrenArr = allocateSubFolders(root);
     // fprintf(stderr, "TEST: END ALLOC SUB\n");
 
     // //populate folder strucutes all the way down
     // fprintf(stderr, "TEST: START CHECK\n");
-    // checkForCycles(parent);
+    // checkForCycles(root);
     // fprintf(stderr, "TEST: END CHECK\n");
 
     // //check for cycles
     // // fprintf(stderr, "TEST: START PRINT\n");
-    // // printFolderStructure(parent);
+    // // printFolderStructure(root);
     // // fprintf(stderr, "TEST: END PRINT\n");
 
     // fprintf(stderr, "TEST: END\n");
     // ////////// END OF HYPOTHETICAL TEST ///////////
 
-    // folderfree(parent);
+    // folderfree(root);
     // fprintf(stderr, "CYCLE: END\n");
 
-    free(parent->canonicalPath);
-    free(parent);
+    free(root->canonicalPath);
+    free(root);
 
-    return RETURN_FAILURE;
+    return RETURN_SUCCESS;
 }
+
+struct folder * allocateSubFolders(struct folder * parent_dir) {
+    int i = 0;
+    struct dirent *dir_read;
+
+    fprintf(stderr, "1\n");
+    //Allocate Array of Subfolders //TODO - free
+    struct folder * subfolders = malloc(parent_dir->numChildren * sizeof(struct folder));
+    fprintf(stderr, "2\n");
+    //Open Parent Directory
+    DIR * dir = opendir(parent_dir->canonicalPath);
+    fprintf(stderr, "3\n");
+    //Populate Child Directories
+    while (((dir_read = readdir(dir)) != NULL) && (i<parent_dir->numChildren)) {
+        fprintf(stderr, "any: %s\n",dir_read->d_name);
+        if(dir_read->d_name[0] == '.') {continue;} //Ignore . and ..
+
+        if(dir_read->d_type == DT_DIR){
+            fprintf(stderr, "dir: %s\n",dir_read->d_name);
+            subfolders[i].ino = dir_read->d_ino;
+            subfolders[i].isRelativeRoot = 0;
+            subfolders[i].isSymLink = 0;
+            subfolders[i].relativePath = getRelativePath(parent_dir->relativePath,dir_read->d_name); //TODO - free
+            fprintf(stderr, "6%s\n",subfolders[i].relativePath);
+            subfolders[i].canonicalPath = canonicalize_file_name(subfolders[i].relativePath); //TODO - free
+            fprintf(stderr, "6%s\n",subfolders[i].canonicalPath);
+            subfolders[i].numChildren = getNumChildren(subfolders[i].canonicalPath);
+            fprintf(stderr,"folder: %s, ino: %d, conPath: %s\n",dir_read->d_name,subfolders[i].ino,subfolders[i].canonicalPath);
+
+            if(subfolders[i].numChildren > 0) {
+                subfolders[i].childrenArr = allocateSubFolders(&subfolders[i]);
+            }
+
+            i++;
+        }
+        else if(dir_read->d_type == DT_LNK) {
+            subfolders[i].ino = dir_read->d_ino;
+            subfolders[i].isRelativeRoot = 0;
+            subfolders[i].isSymLink = 1;
+            subfolders[i].relativePath = getRelativePath(parent_dir->relativePath,dir_read->d_name); //TODO - free
+            subfolders[i].canonicalPath = canonicalize_file_name(subfolders[i].relativePath); //TODO - free
+            fprintf(stderr,"folder: %s, ino: %d, conPath: %s\n",dir_read->d_name,subfolders[i].ino,subfolders[i].canonicalPath);
+
+            //allocate and read into
+            //check if sybolic link is beneath relative root
+            // if it is print it out
+            // if it is not then act like it is normal
+            // do i need to handle c4?
+
+            i++;
+        }
+    }
+
+    closedir(dir);
+    return subfolders;
+}
+
+char * getRelativePath(char * parent_dir, char * foldername){
+    int plen = strlen(parent_dir);
+    int flen = strlen(foldername);
+
+    if (parent_dir[plen-1] != '/'){
+        char * relpath = calloc(0,(plen+flen+1) * sizeof(char));
+        strcat(relpath,parent_dir);
+        strcat(relpath,"/");
+        strcat(relpath,foldername);
+        return relpath;
+    } else {
+        char * relpath = calloc(0,(plen+flen) * sizeof(char));
+        strcat(relpath,parent_dir);
+        strcat(relpath,foldername);
+        return relpath;
+    }
+}
+
 /*
 struct folder * allocateSubFolders(struct folder * parent){
     int i = 0; //counter for the loop
@@ -118,13 +181,41 @@ void getFolderMetadata(struct folder * curr){
     }
 
 }
+*/
+int getNumChildren(char * path){
+    int count = 0;
+    struct dirent *dir_read;
 
-//TODO - directory scanning, built curreltly for hypothetical test
-int getNumChildren(int id){
-    if(id == 0){return 3;} //top parent
-    if((id == 1) | (id == 2) | (id == 3)) {return 2;} //top parent's imeediate children
-    return 0; //else for top prarent's grand children
+    if(path == NULL){
+        fprintf(stderr,"getNumChildren: path is NULL\n");
+        return -1;
+    }
+
+    //Open Dir
+    DIR * dir = opendir(path);
+    if (dir == NULL) {
+        fprintf(stderr,"getNumChildren: Cannot open as directory '%s'\n", path);
+        return -1;
+    }
+
+    //Count Dir's Subfolders
+    while ((dir_read = readdir(dir)) != NULL) {
+        if(dir_read->d_name[0] == '.') {continue;} //Ignore . and ..
+
+        if(dir_read->d_type == DT_DIR){
+            count += 1;
+
+        }
+        else if(dir_read->d_type == DT_LNK) {
+            count += 1;
+
+        }
+    }
+
+    closedir(dir);
+    return count;
 }
+/*
 
 //TODO - symlink scanning, built curreltly for hypothetical test
 int isFolderSymLink(int id){
