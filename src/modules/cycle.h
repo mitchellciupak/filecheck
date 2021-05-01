@@ -21,19 +21,9 @@ struct folder {
 
 int executeCycleCheck(char * path);
 int getNumChildren(char * path);
-struct folder * allocateSubFolders(struct folder * parent);
-int isFolderSymLink(int id);
-int getSymLinkID(int id);
-void checkForCycles(struct folder * parent);
-void printFolderStructure(struct folder * parent);
-void folderfree(struct folder * top);
-void getFolderMetadata(struct folder * curr);
+struct folder * allocateSubFolders(struct folder * parent_dir);
+void freefolderstruct(struct folder * parent);
 char * getRelativePath(char * parent_dir, char * foldername);
-
-//ckemmet
-int findLinkExample(char * path);
-void recursePrint(char * path);
-// int isLink(char* path);
 
 
 #endif
