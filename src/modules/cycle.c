@@ -25,7 +25,7 @@ int executeCycleCheck(char * path) {
     // fprintf(stderr, "CYCLE: root Rel Path = %s\n",root->relativePath);
     // fprintf(stderr, "CYCLE: root Num Sub-Paths = %d\n",root->numChildren);
 
-    freefolderstruct(root);
+    // freefolderstruct(root);
     return RETURN_SUCCESS;
 }
 
@@ -41,7 +41,7 @@ struct folder * allocateSubFolders(struct folder * parent_dir) {
 
     //Populate Child Directories
     while (((dir_read = readdir(dir)) != NULL) && (i<parent_dir->numChildren)) {
-        fprintf(stderr, "any: %s\n",dir_read->d_name);
+        // fprintf(stderr, "any: %s\n",dir_read->d_name);
         if(dir_read->d_name[0] == '.') {continue;} //Ignore . and ..
 
         if(dir_read->d_type == DT_DIR){
@@ -49,7 +49,9 @@ struct folder * allocateSubFolders(struct folder * parent_dir) {
             subfolders[i].ino = dir_read->d_ino;
             subfolders[i].isRelativeRoot = 0;
             subfolders[i].isSymLink = 0;
-            subfolders[i].relativePath = getRelativePath(parent_dir->relativePath,dir_read->d_name); //TODO - free
+            subfolders[i].lino = -1;
+            getRelativePath(parent_dir->relativePath, dir_read->d_name, &subfolders[i].relativePath);
+            // subfolders[i].relativePath = getRelativePath(parent_dir->relativePath,dir_read->d_name); //TODO - free
             // fprintf(stderr, "rel ->%s\n",subfolders[i].relativePath);
             subfolders[i].canonicalPath = canonicalize_file_name(subfolders[i].relativePath); //TODO - free
             subfolders[i].numChildren = getNumChildren(subfolders[i].canonicalPath);
@@ -66,10 +68,16 @@ struct folder * allocateSubFolders(struct folder * parent_dir) {
             subfolders[i].ino = dir_read->d_ino;
             subfolders[i].isRelativeRoot = 0;
             subfolders[i].isSymLink = 1;
-            subfolders[i].relativePath = getRelativePath(parent_dir->relativePath,dir_read->d_name); //TODO - free
-            // fprintf(stderr, "rel -> %s\n",subfolders[i].relativePath);
-            subfolders[i].canonicalPath = canonicalize_file_name(subfolders[i].relativePath); //TODO - free
-            // fprintf(stderr,"folder: %s, ino: %d, conPath: %s\n",dir_read->d_name,subfolders[i].ino,subfolders[i].canonicalPath);
+            // getRelativePath(parent_dir->relativePath, dir_read->d_name, &subfolders[i].relativePath);
+            // subfolders[i].relativePath = getRelativePath(parent_dir->relativePath,dir_read->d_name); //TODO - free
+            fprintf(stdout, "a link is found at %s/%s\n",parent_dir->relativePath,dir_read->d_name);
+
+            // struct stat buf = {0};
+            // stat(subfolders[i].relativePath, &buf);
+            // subfolders[i].lino = buf.st_ino;
+            // subfolders[i].canonicalPath = subfolders[i].relativePath;
+
+            // fprintf(stderr,"folder: %s, ino: %d, lino: %d\n",dir_read->d_name,subfolders[i].ino,subfolders[i].lino);
             i++;
         }
     }
@@ -78,23 +86,18 @@ struct folder * allocateSubFolders(struct folder * parent_dir) {
     return subfolders;
 }
 
-char * getRelativePath(char * parent_dir, char * foldername){
+void getRelativePath(char * parent_dir, char * foldername, char** path){
     int plen = strlen(parent_dir);
     int flen = strlen(foldername);
+    int extra = (parent_dir[plen-1] != '/') ? 1 : 0;
+    char zero[1] = "";
 
-    if (parent_dir[plen-1] != '/'){
-        char * relpath = calloc(0,(plen+flen+2) * sizeof(char));
-        strcat(relpath,parent_dir);
-        strcat(relpath,"/");
-        strcat(relpath,foldername);
-        // strcat(relpath,"/n");
-        return relpath;
-    } else {
-        char * relpath = calloc(0,(plen+flen) * sizeof(char));
-        strcat(relpath,parent_dir);
-        strcat(relpath,foldername);
-        return relpath;
-    }
+    char * relpath = calloc(0, (plen+flen+extra+2) * sizeof(char));
+    strncpy(relpath, parent_dir, plen);
+    strcat(relpath, (parent_dir[plen-1] != '/') ? "/" : "");
+    strncat(relpath, foldername, flen);
+
+    *path = relpath;
 }
 
 int getNumChildren(char * path){
@@ -134,17 +137,25 @@ int getNumChildren(char * path){
 void freefolderstruct(struct folder * parent) {
     int i = 0;
 
-    free(parent->canonicalPath);
-    free(parent->relativePath);
+    if(parent->isSymLink == 0){
+        // fprintf(stderr,"1\n");
+        // free(parent->relativePath);
+        // fprintf(stderr,"1.1\n");
+        // free(parent->canonicalPath);
 
-    for(i = 0; i<parent->numChildren; i++){
-        freefolderstruct(&parent->childrenArr[i]);
     }
 
-    free(parent->childrenArr);
+    for(i = 0; i<parent->numChildren; i++){
+        // fprintf(stderr,"L%d\n",i);
+        // freefolderstruct(&parent->childrenArr[i]);
+    }
+
+    // fprintf(stderr,"2\n");
+    // free(parent->childrenArr);
 
     if(parent->isRelativeRoot == 1){
-        free(parent);
+        // fprintf(stderr,"RR\n");
+        // free(parent);
     }
 
     return;

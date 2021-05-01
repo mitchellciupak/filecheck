@@ -9,6 +9,7 @@
 struct folder {
 
     int ino;
+    int lino;
     int isRelativeRoot;  //0 or 1
     int isSymLink;  //0 or 1
     int numChildren;//0 to INT_MAX
@@ -23,7 +24,6 @@ int executeCycleCheck(char * path);
 int getNumChildren(char * path);
 struct folder * allocateSubFolders(struct folder * parent_dir);
 void freefolderstruct(struct folder * parent);
-char * getRelativePath(char * parent_dir, char * foldername);
-
+void getRelativePath(char * parent_dir, char * foldername, char** path);
 
 #endif
