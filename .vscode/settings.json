@@ -1,10 +1,5 @@
 {
     "files.associations": {
-        "args.h": "c",
-        "perm.h": "c",
-        "info.h": "c",
-        "cerrno": "c",
-        "types.h": "c",
-        "string.h": "c"
+        "typeinfo": "c"
     }
 }

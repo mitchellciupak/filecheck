@@ -1,4 +1,6 @@
 #include "cycle.h"
+#include <libgen.h>
+
 void ascend(char * path);
 //executeCycleCheck
 // - Given a path, display all cyclic links under the path. Specifically,
@@ -64,16 +66,34 @@ int executeCycleCheck(char * path) {
 }
 
 void ascend(char * path){
-    char * parent = malloc(strlen(path) + 4);
-    strcpy(parent, "../");
-    strcat(parent, path);
+    char * parent = malloc(strlen(path) + 3);
+    strcpy(parent, path);
+    strcat(parent, "../");
     
     DIR * dir = opendir(parent);
-    struct dirent* dir_read = readdir(dir);
-
-    printf("Upper level of %s: %s\n", parent, dir_read->d_name);
+    struct dirent* dir_read;
+    char* name = dir_read->d_name;
+    if(strcmp(name, "bin") == 0) return;
     ascend(parent);
+    printf("%s is %s\n", parent, name);
+
+    free(parent);
     closedir(dir);
+}
+
+void levelUp(char ** path){
+    char * strip = strrchr(*path, '/');
+    // EXIT condition
+    if(strip == NULL){
+        *path = "/";
+        return;
+    }
+    int len = strlen(*path) - strlen(strip);
+    char * new = malloc(len);
+    strncpy(new, path, len);
+    char* old = *path;
+    *path = new;
+    free(old);
 }
 
 void descend(struct folder * top){
@@ -81,11 +101,23 @@ void descend(struct folder * top){
     for(int ct = 0; ct < top->numChildren; ct++){
         descend(&top->childrenArr[ct]);
     }
+
     if(top->isSymLink){
         char * a = strstr(top->canonicalPath, top->relativePath);
         if(a != NULL){
-            // TODO find out how to find the symlinked file!
-            printf("Link found from %s to %s\n", top->relativePath, top->canonicalPath);
+
+            char* link = malloc(PATH_MAX);
+            strcpy(link,top->relativePath);
+            ino_t inspect;
+            do{
+                levelUp(&link);
+                struct stat buf = {0};
+                lstat(link, &buf);
+                inspect = buf.st_ino;
+                if(strcmp(link, "/") != 0) break;// EXIT condition
+            } while ((top->ino != inspect));
+            // EXIT condition
+            if(strcmp(link, "/") != 0) printf("Link found from %s to %s\n", top->relativePath, link);
         }
     }
 }
